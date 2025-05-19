@@ -340,7 +340,3 @@ module = codegen.generate(ast, output)
 
 This will return an llvmlite module object, which can either be written into a file or used elsewhere
 
-<a name="Support"></a>
-## Support
-
-If you are having issues, please let me know. You can contact me at mugi.ganesan@gmail.com
