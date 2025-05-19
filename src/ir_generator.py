@@ -71,19 +71,19 @@ class Generator:
         
     def generate(self, ast=[[]], output="output.ll"):
         
-        self.variables = {}
+        self.variables = {}            #reset the state variable
         self.constants = {}
         self.functions = {}
         self.scope     = ''
 
-        self.module = ir.Module(name=output)
+        self.module = ir.Module(name=output)        #create ir module
 
         triple =  binding.get_default_triple()
         self.module.triple = "" # the default triple from llvmlite seems to not work on some devices.
 
         self.setup_std_funcs()
 
-        main_ty = ir.FunctionType(ir.IntType(32), ())
+        main_ty = ir.FunctionType(ir.IntType(32), ())            #main()
         self.main = ir.Function(self.module, main_ty, name="main")
         
         self.scope = self.main
@@ -98,9 +98,9 @@ class Generator:
 
         return self.module
 
-    def codegen(self, node, builder):
+    def codegen(self, node, builder):                #it is arecursive function to generate LLVM IR for each AST node.
 
-        if isinstance(node, pc_ast.Constant):
+        if isinstance(node, pc_ast.Constant):       #Checks if the AST node (node) is a constant.This can be an integer, float, or string 
 
             if node.dType == float:
                 dType = ir.DoubleType()
@@ -137,13 +137,13 @@ class Generator:
             elif node.dType == str:
                 ptr_type = ir.PointerType(ir.IntType(8), addrspace=0)
 
-            return ptr_type('%"'+node.name+'"')
+            return ptr_type('%"'+node.name+'"')        #in LLVM format
 
-        elif isinstance(node, pc_ast.Array_Declaration):
+        elif isinstance(node, pc_ast.Array_Declaration):        #agar vo array declaration hua toh kya krna h 
 
             self.variables[(node.name, self.scope)] = node.dType
 
-            r = node.elements
+            r = node.elements            #number of elements
 
             if isinstance(r, pc_ast.Variable) or isinstance(r, pc_ast.Array_Element):
                 rvalue = self.codegen(r, builder)
@@ -152,7 +152,7 @@ class Generator:
                     rvalue = builder.load(rvalue,name=r.name + "_val",align=None)
 
             else:
-                rvalue = self.codegen(r, builder)
+                rvalue = self.codegen(r, builder)    #Recursively generate LLVM IR for the size expression r and get its value.
 
             if node.dType == int:
                 raw = builder.call(self.malloc, [rvalue], name=node.name+"_raw")
